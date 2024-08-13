@@ -230,14 +230,13 @@ CCCCCCCCCCCCCCCC`],
 
 setSolids([two, four, eight, sixteen, thirtytwo, sixtyfour, onetwentyeight, twofiftysix, fivetwelve, tentwentyfour, twentyfourtyeight, block])
 
-const level =
+const emptyLevel =
   map`
 .bbbb.
 .bbbb.
 .bbbb.
 .bbbb.`
-
-setMap(level)
+setMap(emptyLevel)
 
 var score = 0;
 var scoreDigitArr = score.toString().split('')
@@ -249,3 +248,66 @@ addText(scoreString, {
 })
 
 const board = Array(4).fill().map(() => Array(4).fill(0));
+var boardVisual = emptyLevel;
+
+const numberMapping = {
+  2: two,
+  4: four,
+  8: eight,
+  16: sixteen,
+  32: thirtytwo,
+  64: sixtyfour,
+  128: onetwentyeight,
+  256: twofiftysix,
+  512: fivetwelve,
+  1024: tentwentyfour,
+  2048: twentyfourtyeight
+}
+
+function getRandomNum() {
+  return Math.floor(Math.random() * 4)
+}
+
+function getRandomPos() {
+  var x = getRandomNum()
+  var y = getRandomNum()
+
+  while (board[x][y] != 0) {
+      x = getRandomNum()
+      y = getRandomNum()
+  }
+
+  return {
+    x: x,
+    y: y
+  }
+}
+
+function splitBoardStringIntoArray() {
+  return boardVisual.trim().split('\n').map(line => line.split(''))
+}
+
+function returnToOriginalForm(lines) { 
+  return lines.map(line => line.join('')).join('\n')
+}
+
+function placeTwos() {
+  const randomPos1 = getRandomPos()
+  board[randomPos1.x][randomPos1.y]
+  
+  const randomPos2 = getRandomPos()
+  board[randomPos2.x][randomPos2.y]
+
+  boardVisual = splitBoardStringIntoArray()
+  boardVisual[randomPos1.x + 1][randomPos1.y] = numberMapping[2]
+  boardVisual[randomPos2.x + 1][randomPos2.y] = numberMapping[2]
+  boardVisual = returnToOriginalForm(boardVisual)
+
+  setMap(boardVisual)
+}
+
+placeTwos()
+
+onInput("w", () => {
+  
+})
