@@ -247,8 +247,8 @@ addText(scoreString, {
   color: color`0`
 })
 
-const board = Array(4).fill().map(() => Array(4).fill(0));
-var boardVisual = emptyLevel;
+const board = Array(4).fill().map(() => Array(4).fill(0))
+var boardVisual = emptyLevel
 
 const numberMapping = {
   2: two,
@@ -272,9 +272,9 @@ function getRandomPos() {
   var x = getRandomNum()
   var y = getRandomNum()
 
-  while (board[x][y] != 0) {
-      x = getRandomNum()
-      y = getRandomNum()
+  while (board[y][x] != 0) {
+    x = getRandomNum()
+    y = getRandomNum()
   }
 
   return {
@@ -287,27 +287,119 @@ function splitBoardStringIntoArray() {
   return boardVisual.trim().split('\n').map(line => line.split(''))
 }
 
-function returnToOriginalForm(lines) { 
+function returnToOriginalForm(lines) {
   return lines.map(line => line.join('')).join('\n')
 }
 
-function placeTwos() {
+function startGame() {
   const randomPos1 = getRandomPos()
-  board[randomPos1.x][randomPos1.y]
-  
+  board[randomPos1.y][randomPos1.x] = 2
+
   const randomPos2 = getRandomPos()
-  board[randomPos2.x][randomPos2.y]
+  board[randomPos2.y][randomPos2.x] = 2
 
   boardVisual = splitBoardStringIntoArray()
-  boardVisual[randomPos1.x + 1][randomPos1.y] = numberMapping[2]
-  boardVisual[randomPos2.x + 1][randomPos2.y] = numberMapping[2]
+  boardVisual[randomPos1.y][randomPos1.x + 1] = numberMapping[2]
+  boardVisual[randomPos2.y][randomPos2.x + 1] = numberMapping[2]
   boardVisual = returnToOriginalForm(boardVisual)
 
   setMap(boardVisual)
 }
 
-placeTwos()
+function placeTwo() {
+  const randomPos = getRandomPos()
+  board[randomPos.y][randomPos.x] = 2
+
+  boardVisual = splitBoardStringIntoArray()
+  boardVisual[randomPos.y][randomPos.x + 1] = numberMapping[2]
+  boardVisual = returnToOriginalForm(boardVisual)
+
+  setMap(boardVisual)
+}
+
+startGame()
 
 onInput("w", () => {
+  boardVisual = splitBoardStringIntoArray()
   
+  for (let i = 1; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      if (board[i][j] != 0) {
+        let newPos = i - 1
+        let val = board[i][j]
+        while (board[newPos][j] == 0 && newPos > 0) {
+          newPos--
+        }
+
+        if (board[newPos][j] == val) {
+          // merge tiles
+          val *= 2
+          board[newPos][j] = val
+          board[i][j] = 0
+        } else {
+          // move to empty tile
+          if (board[newPos][j] != 0) {
+            newPos++
+          }
+          board[newPos][j] = val
+          if (newPos != i) {
+            board[i][j] = 0
+          }
+        }
+
+        // change board visual data
+        boardVisual[newPos][j + 1] = numberMapping[val]
+        boardVisual[i][j + 1] = 'b'
+      }
+    }
+  }
+
+  // apply visual changes
+  boardVisual = returnToOriginalForm(boardVisual)
+  setMap(boardVisual)
+  
+  placeTwo()
 })
+
+onInput("s", () => {
+  boardVisual = splitBoardStringIntoArray();
+
+  for (let i = 2; i >= 0; i--) { 
+    for (let j = 0; j < 4; j++) {
+      if (board[i][j] != 0) {
+        let newPos = i + 1;
+        let val = board[i][j];
+
+        // turns out it matters which condition comes first </3, newPos < 4 must be first to ensure we're not trying to access something out of bounds DUH
+        while (newPos < 4 && board[newPos][j] == 0) {
+          newPos++;
+        }
+
+        if (newPos < 4 && board[newPos][j] == val) {
+          // merge tiles
+          val *= 2;
+          board[newPos][j] = val;
+          board[i][j] = 0;
+        } else {
+          // move to empty tile
+          newPos--;
+
+          if (newPos != i) {
+            board[newPos][j] = val;
+            board[i][j] = 0;
+          }
+        }
+
+        // change board visual data
+        boardVisual[newPos][j + 1] = numberMapping[val];
+        boardVisual[i][j + 1] = 'b';
+      }
+    }
+  }
+  
+  // apply visual changes
+  boardVisual = returnToOriginalForm(boardVisual);
+  setMap(boardVisual);
+
+  placeTwo();
+});
