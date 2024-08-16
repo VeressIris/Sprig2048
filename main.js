@@ -288,7 +288,10 @@ function getTwoOrFour() {
 }
 
 function getRandomPos() {
-   const availableSpots = getAvailableSpots()
+  const availableSpots = getAvailableSpots()
+  console.log(availableSpots)
+  const randomIndex = Math.floor(Math.random() * availableSpots.length)
+  return availableSpots[randomIndex]
 }
 
 function splitBoardStringIntoArray() {
