@@ -319,7 +319,7 @@ function startGame() {
   setMap(boardVisual)
 }
 
-function placeNewNumber() {
+function placeNewNumber() { // ONLY IF CAN MOVE IN SPECIFIED DIRECTION
   const randomPos = getRandomPos()
   board[randomPos.y][randomPos.x] = getTwoOrFour()
 
@@ -334,7 +334,7 @@ startGame()
 
 onInput("w", () => {
   boardVisual = splitBoardStringIntoArray()
-  
+
   for (let i = 1; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       if (board[i][j] != 0) {
@@ -347,17 +347,23 @@ onInput("w", () => {
         // merge tiles (essentially double the value)
         if (board[newPos][j] == val) {
           val *= 2
-        } else { // move to nearest empty tile
+        } else if (board[newPos][j] != 0) { // move to nearest empty tile
           newPos++
+        } else {
+          
         }
 
-        // update board in memory
-        board[newPos][j] = val
-        board[i][j] = 0
+        // if tile could/can move
+        if (newPos != i) {
+          // update board in memory
+          board[newPos][j] = val
+          board[i][j] = 0
+  
+          // change board visual data
+          boardVisual[newPos][j + 1] = numberMapping[val]
+          boardVisual[i][j + 1] = 'b'
+        }
         
-        // change board visual data
-        boardVisual[newPos][j + 1] = numberMapping[val]
-        boardVisual[i][j + 1] = 'b'
       }
     }
   }
@@ -365,6 +371,6 @@ onInput("w", () => {
   // apply visual changes
   boardVisual = returnToOriginalForm(boardVisual)
   setMap(boardVisual)
-  
+
   placeNewNumber()
 })
