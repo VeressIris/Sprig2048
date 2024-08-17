@@ -95,15 +95,15 @@ DDDDDDDDDDDDDDDD`],
 5555555555555555
 5555555555555555
 5550005550005555
-5505550505550555
+5505550500500555
 5555550505550555
-5555550505550555
-5550005550005555
-5555550505550555
-5555550505550555
-5555550505550555
-5505550505550555
-5550005550005555
+5555550555550555
+5550005555500555
+5555550555005555
+5555550550055555
+5555550550555555
+5505550500555555
+5550005500000555
 5555555555555555
 5555555555555555
 5555555555555555`],
@@ -248,13 +248,30 @@ function updateScore() {
   })
 }
 
-var score = 0;
+var score = 0
 var scoreDigitArr = []
 var scoreString = ""
 var gameOver = false
+var won = false
 
-const board = Array(4).fill().map(() => Array(4).fill(0))
+var board = Array(4).fill().map(() => Array(4).fill(0))
 var boardVisual = emptyLevel
+
+function resetGame() {
+  gameOver = false
+  won = false
+  setMap(emptyLevel)
+  
+  board = Array(4).fill().map(() => Array(4).fill(0))
+  boardVisual = emptyLevel
+  
+  score = 0
+  scoreDigitArr = []
+  scoreString = ""
+  clearText()
+
+  startGame()
+}
 
 const numberMapping = {
   2: two,
@@ -307,9 +324,9 @@ function possibleMoves() {
 function getRandomPos() {
   const availableSpots = getAvailableSpots()
   if (availableSpots.length === 0) {
-    gameOver = true
     return null
   }
+  
   const randomIndex = Math.floor(Math.random() * availableSpots.length)
   return availableSpots[randomIndex]
 }
@@ -344,16 +361,6 @@ function startGame() {
 
 function placeNewNumber() { // ONLY IF CAN MOVE IN SPECIFIED DIRECTION
   const randomPos = getRandomPos()
-
-  if (gameOver) {
-    addText("Game over!", {
-      x: 6,
-      y: 7,
-      color: color`2`
-    })
-    return
-  }
-  
   const val = getTwoOrFour()
   board[randomPos.y][randomPos.x] = val
 
@@ -375,8 +382,17 @@ function applyVisualChanges() {
   updateScore()
 }
 
-// depending on the axis + update score
+// depending on the axis + update score + check if won
 function updateBoardsData(val, newPos, i, j, axis) {
+  if (val == 2048) {
+    won = true
+    addText("     You win!\nPress i to restart", {
+      x: 1,
+      y: 7,
+      color: color`4`
+    })
+  }
+  
   if (axis == "y") {
     // update board in memory
     board[newPos][j] = val
@@ -397,8 +413,21 @@ function updateBoardsData(val, newPos, i, j, axis) {
 }
 
 onInput("w", () => {
+  if (won) return
+  
+  if (getAvailableSpots().length === 0 && !possibleMoves()) {
+    gameOver = true
+    addText("     Game over!\nPress i to restart", {
+      x: 1,
+      y: 7,
+      color: color`3`
+    })
+    return
+  }
+  
   boardVisual = splitBoardStringIntoArray()
   let addNewNumber = false
+  let merges = 0
   
   for (let i = 1; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
@@ -410,9 +439,10 @@ onInput("w", () => {
         }
 
         // merge tiles (essentially double the value)
-        if (board[newPos][j] === val) {
+        if (board[newPos][j] === val && merges < 2) {
           val *= 2
           score += val // update score
+          merges++
         } else if (board[newPos][j] != 0) { // move to nearest empty tile
           newPos++
         }
@@ -433,8 +463,21 @@ onInput("w", () => {
 })
 
 onInput("s", () => {
+  if (won) return
+  
+  if (getAvailableSpots().length === 0 && !possibleMoves()) {
+    gameOver = true
+    addText("     Game over!\nPress i to restart", {
+      x: 1,
+      y: 7,
+      color: color`3`
+    })
+    return
+  }
+  
   boardVisual = splitBoardStringIntoArray()
   let addNewNumber = false
+  let merges = 0
   
   for (let i = 2; i >= 0; i--) {
     for (let j = 0; j < 4; j++) {
@@ -446,9 +489,10 @@ onInput("s", () => {
         }
 
         // merge tiles (essentially double the value)
-        if (board[newPos][j] === val) {
+        if (board[newPos][j] === val && merges < 2) {
           val *= 2
           score += val // update score
+          merges++
         } else if (board[newPos][j] != 0) { // move to nearest empty tile
           newPos--
         }
@@ -469,8 +513,21 @@ onInput("s", () => {
 })
 
 onInput("a", () => {
+  if (won) return
+  
+  if (getAvailableSpots().length === 0 && !possibleMoves()) {
+    gameOver = true
+    addText("     Game over!\nPress i to restart", {
+      x: 1,
+      y: 7,
+      color: color`3`
+    })
+    return
+  }
+  
   boardVisual = splitBoardStringIntoArray()
   let addNewNumber = false
+  let merges = 0
   
   for (let i = 0; i < 4; i++) {
     for (let j = 1; j < 4; j++) {
@@ -482,9 +539,10 @@ onInput("a", () => {
         }
 
         // merge tiles (essentially double the value)
-        if (board[i][newPos] === val) {
+        if (board[i][newPos] === val && merges < 2) {
           val *= 2
           score += val // update score
+          merges++
         } else if (board[i][newPos] != 0) { // move to nearest empty tile
           newPos++
         }
@@ -505,8 +563,21 @@ onInput("a", () => {
 })
 
 onInput("d", () => { 
+  if (won) return
+  
+  if (getAvailableSpots().length === 0 && !possibleMoves()) {
+    gameOver = true
+    addText("     Game over!\nPress i to restart", {
+      x: 1,
+      y: 7,
+      color: color`3`
+    })
+    return
+  }
+  
   boardVisual = splitBoardStringIntoArray()
   let addNewNumber = false
+  let merges = 0
   
   for (let i = 0; i < 4; i++) {
     for (let j = 2; j >= 0; j--) {
@@ -518,9 +589,10 @@ onInput("d", () => {
         }
 
         // merge tiles (essentially double the value)
-        if (board[i][newPos] === val) {
+        if (board[i][newPos] === val && merges < 2) {
           val *= 2
           score += val // update score
+          merges++
         } else if (board[i][newPos] != 0) { // move to nearest empty tile
           newPos--
         }
@@ -538,6 +610,11 @@ onInput("d", () => {
   applyVisualChanges()
 
   if (addNewNumber) placeNewNumber()
+})
+
+onInput("i", () => {
+  if (!gameOver && !won) return
+  resetGame()
 })
 
 startGame()
