@@ -289,7 +289,7 @@ function getTwoOrFour() {
 
 function getRandomPos() {
   const availableSpots = getAvailableSpots()
-  console.log(availableSpots)
+  if (availableSpots.length === 0) return null
   const randomIndex = Math.floor(Math.random() * availableSpots.length)
   return availableSpots[randomIndex]
 }
@@ -304,10 +304,12 @@ function returnToOriginalForm(lines) {
 
 function startGame() {
   const randomPos1 = getRandomPos()
+  if (randomPos1 === null) return
   const randomNumber1 = getTwoOrFour()
   board[randomPos1.y][randomPos1.x] = randomNumber1
 
   const randomPos2 = getRandomPos()
+  if (randomPos2 === null) return
   const randomNumber2 = getTwoOrFour()
   board[randomPos2.y][randomPos2.x] = randomNumber2
 
@@ -321,8 +323,8 @@ function startGame() {
 
 function placeNewNumber() { // ONLY IF CAN MOVE IN SPECIFIED DIRECTION
   const randomPos = getRandomPos()
+  if (!randomPos) return
   board[randomPos.y][randomPos.x] = getTwoOrFour()
-
   boardVisual = splitBoardStringIntoArray()
   boardVisual[randomPos.y][randomPos.x + 1] = numberMapping[2]
   boardVisual = returnToOriginalForm(boardVisual)
@@ -349,8 +351,6 @@ onInput("w", () => {
           val *= 2
         } else if (board[newPos][j] != 0) { // move to nearest empty tile
           newPos++
-        } else {
-          
         }
 
         // if tile could/can move
@@ -362,8 +362,7 @@ onInput("w", () => {
           // change board visual data
           boardVisual[newPos][j + 1] = numberMapping[val]
           boardVisual[i][j + 1] = 'b'
-        }
-        
+        }  
       }
     }
   }
