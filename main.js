@@ -20,6 +20,7 @@ const fivetwelve = "9"
 const tentwentyfour = "0"
 const twentyfourtyeight = "w"
 const block = "b"
+const doubleScore = "d"
 
 setLegend(
   [two, bitmap`
@@ -225,10 +226,27 @@ CCCCCCCCCCCCCCCC`],
 1LLLLLLLLLLLLLL1
 1LLLLLLLLLLLLLL1
 1LLLLLLLLLLLLLL1
-1111111111111111`]
+1111111111111111`],
+  [doubleScore, bitmap`
+LLLLLLLLLLLLLLLL
+LLLLLLLLLLLLLLLL
+LLLLLLLLL00000LL
+LLLLLLLL00LLL00L
+LLLLLLLL0LLLLL0L
+LLLLLLLLLLLLLL0L
+LLLLLLLLLLLLL00L
+LLLLLLLLLLLLL0LL
+LL0LLL0LLLLL00LL
+LLL0L0LLLLLL0LLL
+LLLL0LLLLLL00LLL
+LLL0L0LLLL00LLLL
+LL0LLL0LL00LLLLL
+LLLLLLLL00LLLLLL
+LLLLLLLL0000000L
+LLLLLLLLLLLLLLLL`]
 )
 
-setSolids([two, four, eight, sixteen, thirtytwo, sixtyfour, onetwentyeight, twofiftysix, fivetwelve, tentwentyfour, twentyfourtyeight, block])
+setSolids([two, four, eight, sixteen, thirtytwo, sixtyfour, onetwentyeight, twofiftysix, fivetwelve, tentwentyfour, twentyfourtyeight, block, doubleScore])
 
 const emptyLevel =
   map`
@@ -284,7 +302,8 @@ const numberMapping = {
   256: twofiftysix,
   512: fivetwelve,
   1024: tentwentyfour,
-  2048: twentyfourtyeight
+  2048: twentyfourtyeight,
+  20: doubleScore
 }
 
 function getAvailableSpots() {
@@ -359,9 +378,14 @@ function startGame() {
   updateScore()
 }
 
+function updateScoreVal(val) {
+  if (val === 20) score *=2
+  else score += val
+}
+
 function placeNewNumber() { // ONLY IF CAN MOVE IN SPECIFIED DIRECTION
   const randomPos = getRandomPos()
-  const val = getTwoOrFour()
+  const val = shouldDoubleScore ? 20 : getTwoOrFour()
   board[randomPos.y][randomPos.x] = val
 
   boardVisual = splitBoardStringIntoArray()
@@ -370,8 +394,7 @@ function placeNewNumber() { // ONLY IF CAN MOVE IN SPECIFIED DIRECTION
 
   setMap(boardVisual)
 
-  // update score
-  score += val
+  updateScoreVal(val)
   updateScore()
 }
 
@@ -380,6 +403,11 @@ function applyVisualChanges() {
   setMap(boardVisual)
 
   updateScore()
+}
+
+// has 0.8% chance of doubling your score
+function shouldDoubleScore() {
+  return Math.random() > 0.92 ? true : false
 }
 
 // depending on the axis + update score + check if won
@@ -445,6 +473,11 @@ onInput("w", () => {
           merges++
         } else if (board[newPos][j] != 0) { // move to nearest empty tile
           newPos++
+        }
+        else if (val === 20) { //should double score
+          updateScoreVal(val)
+          val *= board[newPos][j]
+          merges++
         }
         
         // if tile could/can move
